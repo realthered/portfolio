@@ -1,19 +1,16 @@
 name: Terraform Infrastructure
 
+permissions:
+  id-token: write
+  contents: write
+
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - "infra/aws/**"
-      - ".github/workflow/infra.yaml"
-  pull_request:
-    branches:
-      - main
-    paths:
-      - "infra/aws/**"
-      - ".github/workflow/infra.yaml"
-  workflow_dispatch:
+  workflow_call:
+    inputs:
+      target:
+        description: 'The target directory for Terraform operations'
+        required: true
+        type: string
 
 env:
   TF_VERSION: "1.14.3"
@@ -31,10 +28,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
+          audience: sts.amazonaws.com
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
@@ -51,15 +51,18 @@ jobs:
       - name: Terraform Init
         id: init
         run: terraform init
+        working-directory: ${{ inputs.target }}
 
       - name: Terraform Validate
         id: validate
         run: terraform validate -no-color
+        working-directory: ${{ inputs.target }}
 
       - name: Terraform Plan
         id: plan
         run: terraform plan -no-color -out=tfplan
         continue-on-error: true
+        working-directory: ${{ inputs.target }}
 
       - name: Comment on PR
         if: github.event_name == 'pull_request'
@@ -96,5 +99,9 @@ jobs:
         run: exit 1
 
       - name: Terraform Apply
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        if: |
+          steps.plan.outputs.exitcode == 2 &&
+          (github.event_name == 'workflow_dispatch' ||
+          (github.event_name == 'push' && github.ref == 'refs/heads/master') ||
+          (github.event_name == 'pull_request' && github.event.pull_request.merged == true))
         run: terraform apply -auto-approve tfplan
