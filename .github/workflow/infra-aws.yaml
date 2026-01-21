@@ -1,0 +1,28 @@
+name: infra-aws
+
+permissions:
+  id-token: write
+
+on:
+  push:
+    branches:
+      - "*"
+    paths:
+      - "infra/aws/**.tf"
+  pull_request:
+    branches:
+      - "*"
+    paths:
+      - "infra/aws/**.tf"
+  workflow_dispatch:
+
+jobs:
+  TriggerReusableWorkflow:
+    uses: ./.github/workflows/infra-template.yaml
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') || 
+      github.event_name == 'pull_request' || 
+      github.event_name == 'workflow_dispatch'
+    with:
+      target: infra/aws
+    secrets: inherit
