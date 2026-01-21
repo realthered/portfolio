@@ -1,0 +1,25 @@
+name: infra-azure
+
+on:
+  push:
+    branches:
+      - "*"
+    paths:
+      - "infra/azure/**.tf"
+  pull_request:
+    branches:
+      - "*"
+    paths:
+      - "infra/azure/**.tf"
+  workflow_dispatch:
+
+jobs:
+  TriggerReusableWorkflow:
+    uses: ./.github/workflows/infra-template.yaml
+    if: |
+      github.event_name == 'push' ||
+      github.event_name == 'pull_request' ||
+      github.event_name == 'workflow_dispatch'
+    with:
+      target: infra/azure
+    secrets: inherit
