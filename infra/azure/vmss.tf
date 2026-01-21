@@ -1,4 +1,3 @@
-# User Assigned Managed Identity for VMSS
 resource "azurerm_user_assigned_identity" "vmss_identity" {
   name                = "${local.app_name}-vmss-identity"
   location            = azurerm_resource_group.main.location
@@ -7,14 +6,12 @@ resource "azurerm_user_assigned_identity" "vmss_identity" {
   tags = local.tags
 }
 
-# Role Assignment for Public IP management
 resource "azurerm_role_assignment" "vmss_network_contributor" {
   scope                = azurerm_resource_group.main.id
   role_definition_name = "Network Contributor"
   principal_id         = azurerm_user_assigned_identity.vmss_identity.principal_id
 }
 
-# Virtual Machine Scale Set
 resource "azurerm_linux_virtual_machine_scale_set" "vmss" {
   name                = "${local.app_name}-vmss"
   location            = azurerm_resource_group.main.location
@@ -24,10 +21,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "vmss" {
   admin_username      = local.admin_username
   upgrade_mode        = "Automatic"
 
-  admin_ssh_key {
-    username   = local.admin_username
-    public_key = file("~/.ssh/id_rsa.pub")
-  }
+  admin_password = var.vmss_password
 
   source_image_reference {
     publisher = "Canonical"
