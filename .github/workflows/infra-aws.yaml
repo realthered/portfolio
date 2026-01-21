@@ -17,7 +17,7 @@ jobs:
   TriggerReusableWorkflow:
     uses: ./.github/workflows/infra-template.yaml
     if: |
-      (github.event_name == 'push' && github.ref == 'refs/heads/main') || 
+      github.event_name == 'push' || 
       github.event_name == 'pull_request' || 
       github.event_name == 'workflow_dispatch'
     with:
