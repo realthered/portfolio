@@ -1,19 +1,12 @@
 name: Terraform Infrastructure
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - "infra/aws/**"
-      - ".github/workflow/infra.yaml"
-  pull_request:
-    branches:
-      - main
-    paths:
-      - "infra/aws/**"
-      - ".github/workflow/infra.yaml"
-  workflow_dispatch:
+  workflow_call:
+    inputs:
+      target:
+        description: 'The target directory for Terraform operations'
+        required: true
+        type: string
 
 env:
   TF_VERSION: "1.14.3"
