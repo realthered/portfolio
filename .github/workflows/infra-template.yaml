@@ -1,5 +1,9 @@
 name: Terraform Infrastructure
 
+permissions:
+  id-token: write
+  contents: write
+
 on:
   workflow_call:
     inputs:
