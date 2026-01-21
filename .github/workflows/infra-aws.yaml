@@ -1,8 +1,5 @@
 name: infra-aws
 
-permissions:
-  id-token: write
-
 on:
   push:
     branches:
