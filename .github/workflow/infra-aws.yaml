@@ -18,7 +18,7 @@ on:
 
 jobs:
   TriggerReusableWorkflow:
-    uses: ./.github/workflows/template-install.yaml
+    uses: ./.github/workflows/infra-template.yaml
     if: |
       (github.event_name == 'push' && github.ref == 'refs/heads/main') || 
       github.event_name == 'pull_request' || 
